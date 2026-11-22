@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block page_title %}Oylik hisob-kitob (Payroll){% endblock %}
+
+{% block content %}
+<div class="card">
+  <form method="GET" style="display:flex;gap:12px;align-items:center;margin-bottom:18px;">
+    <label><strong>Oy:</strong></label>
+    <input type="month" name="month" value="{{ month_key }}" class="form-control" style="max-width:200px;" />
+    <button type="submit" class="btn btn-dark">Ko‘rsatish</button>
+  </form>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>O‘qituvchi</th>
+          <th>Turi</th>
+          <th>Darslar</th>
+          <th>Asosiy</th>
+          <th>Bonus / Jarima</th>
+          <th>Jami</th>
+          <th>Holat</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><strong>{{ r.teacher.full_name }}</strong></td>
+          <td>{{ "Darsbay" if r.teacher.salary_type == "per_lesson" else "Fiks" }}</td>
+          <td>{{ r.lessons_count }}</td>
+          <td>{{ "{:,.0f}".format(r.base_salary) }}</td>
+          <td>
+            <form method="POST" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <input type="hidden" name="month_key" value="{{ month_key }}" />
+              <input type="hidden" name="teacher_id" value="{{ r.teacher.id }}" />
+              <input type="number" step="1000" name="bonus" value="{{ r.bonus }}" class="form-control" style="width:105px;padding:6px 8px;" />
+              <input type="number" step="1000" name="deductions" value="{{ r.deductions }}" class="form-control" style="width:105px;padding:6px 8px;" />
+              <button type="submit" name="action" value="calculate" class="btn btn-dark" style="padding:6px 10px;font-size:12px;">Hisobla</button>
+              <button type="submit" name="action" value="mark_paid" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">To‘landi</button>
+            </form>
+          </td>
+          <td><strong>{{ "{:,.0f}".format(r.total_payable) }} so‘m</strong></td>
+          <td>
+            {% if r.is_paid %}<span class="badge badge-green">To‘langan</span>
+            {% else %}<span class="badge badge-red">To‘lanmagan</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;color:#6B7280;">O‘qituvchilar topilmadi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

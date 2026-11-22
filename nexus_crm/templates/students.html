@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block page_title %}O‘quvchilar{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;">
+    <form method="GET" style="display:flex;gap:10px;flex:1;">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Ism yoki telefon bo‘yicha qidirish" />
+      <button type="submit" class="btn btn-dark">Qidirish</button>
+    </form>
+    <a href="{{ url_for('student_create') }}" class="btn btn-primary">+ O‘quvchi qo‘shish</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Ism familiya</th>
+          <th>Telefon</th>
+          <th>Ota-ona telefoni</th>
+          <th>Kurs</th>
+          <th>Guruh</th>
+          <th>To‘lov</th>
+          <th>Holat</th>
+          <th>Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td><strong>{{ student.full_name }}</strong></td>
+          <td>{{ student.phone }}</td>
+          <td>{{ student.parent_phone or '—' }}</td>
+          <td>{{ student.course.name if student.course else '—' }}</td>
+          <td>{{ student.group.name if student.group else '—' }}</td>
+          <td>{{ "{:,.0f}".format(student.monthly_fee) }} so‘m</td>
+          <td>
+            {% if student.payment_status == 'paid' %}
+              <span class="badge badge-green">To‘langan</span>
+            {% else %}
+              <span class="badge badge-red">To‘lanmagan</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <a href="{{ url_for('student_edit', student_id=student.id) }}" class="btn btn-dark" style="padding:6px 10px;font-size:12px;">Tahrirlash</a>
+              {% if current_user.role == 'admin' %}
+              <form method="POST" action="{{ url_for('student_delete', student_id=student.id) }}" onsubmit="return confirm('O‘quvchi o‘chirilsinmi?');">
+                <button type="submit" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">O‘chirish</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:#6B7280;">Hozircha o‘quvchilar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

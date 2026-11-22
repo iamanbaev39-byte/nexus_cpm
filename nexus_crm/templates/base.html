@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ brand_name }} — Education CRM</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">N</div>
+      <div class="brand-title">{{ brand_name }}</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+      <li><a href="{{ url_for('teachers_list') }}">O‘qituvchilar</a></li>
+      <li><a href="{{ url_for('students_list') }}">O‘quvchilar</a></li>
+      <li><a href="{{ url_for('courses_view') }}">Kurslar va Guruhlar</a></li>
+      <li><a href="{{ url_for('attendance_view') }}">Davomat</a></li>
+      <li><a href="{{ url_for('payroll_view') }}">Oylik (Payroll)</a></li>
+    </ul>
+    <a href="{{ url_for('logout') }}" class="btn btn-primary" style="justify-content:center;">Chiqish</a>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <h1>{% block page_title %}{{ brand_name }} CRM{% endblock %}</h1>
+      <span class="badge badge-blue">{{ current_user.full_name }}</span>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

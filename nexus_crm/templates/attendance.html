@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block page_title %}Davomat{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h3 style="margin-bottom:14px;">Yangi dars ochish</h3>
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Guruh</label>
+        <select name="group_id" class="form-control" required>
+          <option value="">Guruhni tanlang</option>
+          {% for group in groups %}
+          <option value="{{ group.id }}">{{ group.name }}{% if group.course %} — {{ group.course.name }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>O‘qituvchi</label>
+        <select name="teacher_id" class="form-control">
+          <option value="">— Tanlanmagan —</option>
+          {% for teacher in teachers %}
+          <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sana</label>
+        <input type="date" name="lesson_date" class="form-control" value="{{ now_date if now_date else '' }}" />
+      </div>
+      <div class="form-group">
+        <label>Mavzu</label>
+        <input type="text" name="topic" class="form-control" placeholder="Dars mavzusi" />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Darsni ochish</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:14px;">Ochilgan darslar</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Sana</th>
+          <th>Guruh</th>
+          <th>O‘qituvchi</th>
+          <th>Mavzu</th>
+          <th>Amal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lesson in lessons %}
+        <tr>
+          <td>{{ lesson.lesson_date }}</td>
+          <td><strong>{{ lesson.group.name if lesson.group else '—' }}</strong></td>
+          <td>{% if lesson.teacher_id %}{{ lesson.teacher.full_name if lesson.teacher else '—' }}{% else %}—{% endif %}</td>
+          <td>{{ lesson.topic or 'Ko‘rsatilmagan' }}</td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <a href="{{ url_for('mark_attendance', lesson_id=lesson.id) }}" class="btn btn-dark" style="padding:6px 10px;font-size:12px;">Davomatni belgilash</a>
+              {% if current_user.role == 'admin' %}
+              <form method="POST" action="{{ url_for('lesson_delete', lesson_id=lesson.id) }}" onsubmit="return confirm('Dars va davomat o‘chirilsinmi?');">
+                <button type="submit" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">O‘chirish</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#6B7280;">Hozircha ochilgan darslar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

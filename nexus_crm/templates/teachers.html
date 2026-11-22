@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block page_title %}O‘qituvchilar{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;">
+    <form method="GET" style="display:flex;gap:10px;flex:1;">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Ism, fan yoki telefon bo‘yicha qidirish" />
+      <button type="submit" class="btn btn-dark">Qidirish</button>
+    </form>
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('teacher_create') }}" class="btn btn-primary">+ O‘qituvchi qo‘shish</a>
+    {% endif %}
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Ism familiya</th>
+          <th>Telefon</th>
+          <th>Fan</th>
+          <th>Ish haqi turi</th>
+          <th>Summa</th>
+          <th>Holat</th>
+          {% if current_user.role == 'admin' %}<th>Amallar</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for teacher in teachers %}
+        <tr>
+          <td><strong>{{ teacher.full_name }}</strong></td>
+          <td>{{ teacher.phone }}</td>
+          <td>{{ teacher.subject }}</td>
+          <td>{{ "Darsbay" if teacher.salary_type == "per_lesson" else "Fiks" }}</td>
+          <td>{{ "{:,.0f}".format(teacher.salary_amount) }} so‘m</td>
+          <td>
+            {% if teacher.status == 'active' %}
+              <span class="badge badge-green">Faol</span>
+            {% else %}
+              <span class="badge badge-red">Nofaol</span>
+            {% endif %}
+          </td>
+          {% if current_user.role == 'admin' %}
+          <td style="display:flex;gap:8px;">
+            <a href="{{ url_for('teacher_edit', teacher_id=teacher.id) }}" class="btn btn-dark" style="padding:6px 10px;font-size:12px;">Tahrirlash</a>
+            <form method="POST" action="{{ url_for('teacher_delete', teacher_id=teacher.id) }}" onsubmit="return confirm('O‘qituvchi o‘chirilsinmi?');">
+              <button type="submit" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">O‘chirish</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{% if current_user.role == 'admin' %}7{% else %}6{% endif %}" style="text-align:center;color:#6B7280;">Hozircha o‘qituvchilar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

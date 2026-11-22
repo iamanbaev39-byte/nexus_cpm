@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block page_title %}Davomat: {{ lesson.group.name }} ({{ lesson.lesson_date }}){% endblock %}
+
+{% block content %}
+<div class="card">
+  <p style="margin-bottom:16px;color:#6B7280;">Mavzu: <strong>{{ lesson.topic or 'Ko‘rsatilmagan' }}</strong></p>
+  <form method="POST">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>O‘quvchi</th>
+            <th>Telefon</th>
+            <th>Davomat holati</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for st in students %}
+          {% set cur = existing.get(st.id).status if existing.get(st.id) else 'present' %}
+          <tr>
+            <td><strong>{{ st.full_name }}</strong></td>
+            <td>{{ st.phone }}</td>
+            <td>
+              <select name="status_{{ st.id }}" class="form-control" style="max-width:200px;">
+                <option value="present" {% if cur == 'present' %}selected{% endif %}>Keldi (Present)</option>
+                <option value="late" {% if cur == 'late' %}selected{% endif %}>Kechikdi (Late)</option>
+                <option value="absent" {% if cur == 'absent' %}selected{% endif %}>Kelmadi (Absent)</option>
+              </select>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" style="text-align:center;color:#6B7280;">Bu guruhda o‘quvchilar biriktirilmagan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:18px;">
+      <button type="submit" class="btn btn-primary">Davomatni saqlash</button>
+      <a href="{{ url_for('attendance_view') }}" class="btn btn-dark">Orqaga</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

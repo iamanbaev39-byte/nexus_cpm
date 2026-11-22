@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block page_title %}Boshqaruv paneli (Dashboard){% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Jami o‘quvchilar</div>
+    <div class="stat-value">{{ total_students }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Faol o‘qituvchilar</div>
+    <div class="stat-value">{{ total_teachers }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Bugungi davomat</div>
+    <div class="stat-value stat-accent">{{ attendance_pct }}%</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Oylik tushum</div>
+    <div class="stat-value stat-accent">{{ "{:,.0f}".format(monthly_income) }} so‘m</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Oylik xarajatlar</div>
+    <div class="stat-value">{{ "{:,.0f}".format(monthly_expenses) }} so‘m</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Oylik ish haqi fondi</div>
+    <div class="stat-value">{{ "{:,.0f}".format(total_salary_expenses) }} so‘m</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Oylik sof foyda</div>
+    <div class="stat-value stat-accent">{{ "{:,.0f}".format(net_profit) }} so‘m</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Faol kurslar</div>
+    <div class="stat-value">{{ active_courses }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Yangi ro‘yxatga olinganlar</div>
+    <div class="stat-value">{{ new_registrations }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Jami guruhlar</div>
+    <div class="stat-value">{{ total_groups }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">To‘lov qilganlar</div>
+    <div class="stat-value stat-accent">{{ paid_students }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">To‘lov qilmaganlar</div>
+    <div class="stat-value">{{ unpaid_students }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Nofaol o‘qituvchilar</div>
+    <div class="stat-value">{{ inactive_teachers }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+  <div class="card">
+    <h3 style="margin-bottom:16px;">Moliyaviy ko‘rsatkichlar</h3>
+    <canvas id="financeChart" height="150"></canvas>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:16px;">Kurslar bo‘yicha o‘quvchilar</h3>
+    <canvas id="courseChart" height="150"></canvas>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+  <div class="card">
+    <h3 style="margin-bottom:16px;">So‘nggi 7 kun davomat foizi</h3>
+    <canvas id="attendanceChart" height="150"></canvas>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:16px;">Umumiy holat</h3>
+    <canvas id="paymentChart" height="150"></canvas>
+  </div>
+</div>
+
+<script>
+  Chart.defaults.font.family = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+  new Chart(document.getElementById('financeChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Oylik tushum', 'Oylik xarajatlar', 'Ish haqi fondi'],
+      datasets: [{
+        label: 'Summa (so‘m)',
+        data: [{{ monthly_income | tojson }}, {{ monthly_expenses | tojson }}, {{ total_salary_expenses | tojson }}],
+        backgroundColor: ['#4f46e5', '#111827', '#818cf8'],
+        borderRadius: 8
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: '#eef0f4' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById('courseChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ course_labels | tojson }},
+      datasets: [{
+        data: {{ course_values | tojson }},
+        backgroundColor: ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#312e81'],
+        borderWidth: 3,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom' } } }
+  });
+
+  new Chart(document.getElementById('attendanceChart'), {
+    type: 'line',
+    data: {
+      labels: {{ attendance_labels | tojson }},
+      datasets: [{
+        label: 'Davomat %',
+        data: {{ attendance_values | tojson }},
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79, 70, 229, 0.12)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointBackgroundColor: '#4f46e5'
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true, suggestedMax: 100, grid: { color: '#eef0f4' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById('paymentChart'), {
+    type: 'pie',
+    data: {
+      labels: ['To‘lov qilganlar', 'To‘lov qilmaganlar'],
+      datasets: [{
+        data: [{{ paid_students }}, {{ unpaid_students }}],
+        backgroundColor: ['#22c55e', '#f97316'],
+        borderWidth: 3,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+</script>
+{% endblock %}

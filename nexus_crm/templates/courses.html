@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block page_title %}Kurslar va Guruhlar{% endblock %}
+
+{% block content %}
+<div class="form-grid" style="margin-bottom:24px;">
+  <div class="card" style="margin-bottom:0;">
+    <h3 style="margin-bottom:14px;">Yangi kurs qo‘shish</h3>
+    <form method="POST">
+      <input type="hidden" name="form_type" value="course" />
+      <div class="form-group">
+        <label>Kurs nomi</label>
+        <input type="text" name="name" class="form-control" required />
+      </div>
+      <div class="form-group">
+        <label>Oylik narxi (so‘m)</label>
+        <input type="number" step="1000" name="monthly_fee" class="form-control" value="500000" required />
+      </div>
+      <div class="form-group">
+        <label>Tavsif</label>
+        <input type="text" name="description" class="form-control" />
+      </div>
+      <button type="submit" class="btn btn-primary">Kursni qo‘shish</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-bottom:0;">
+    <h3 style="margin-bottom:14px;">Yangi guruh ochish</h3>
+    <form method="POST">
+      <input type="hidden" name="form_type" value="group" />
+      <div class="form-group">
+        <label>Guruh nomi</label>
+        <input type="text" name="group_name" class="form-control" required />
+      </div>
+      <div class="form-group">
+        <label>Kurs</label>
+        <select name="course_id" class="form-control" required>
+          {% for c in courses %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>O‘qituvchi</label>
+        <select name="teacher_id" class="form-control">
+          <option value="">— Tanlanmagan —</option>
+          {% for t in teachers %}<option value="{{ t.id }}">{{ t.full_name }} ({{ t.subject }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Dars vaqti / jadvali</label>
+        <input type="text" name="schedule_info" class="form-control" />
+      </div>
+      <button type="submit" class="btn btn-primary">Guruh yaratish</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:14px;">Mavjud kurslar</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Kurs</th>
+          <th>Oylik narx</th>
+          <th>Tavsif</th>
+          <th>Holat</th>
+          {% if current_user.role == 'admin' %}<th>Amal</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for course in courses %}
+        <tr>
+          <td><strong>{{ course.name }}</strong></td>
+          <td>{{ "{:,.0f}".format(course.monthly_fee) }} so‘m</td>
+          <td>{{ course.description or '—' }}</td>
+          <td>{% if course.is_active %}<span class="badge badge-green">Faol</span>{% else %}<span class="badge badge-red">Nofaol</span>{% endif %}</td>
+          {% if current_user.role == 'admin' %}
+          <td>
+            <form method="POST" action="{{ url_for('course_delete', course_id=course.id) }}" onsubmit="return confirm('Kurs o‘chirilsinmi?');">
+              <button type="submit" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">O‘chirish</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{% if current_user.role == 'admin' %}5{% else %}4{% endif %}" style="text-align:center;color:#6B7280;">Hozircha kurslar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:14px;">Mavjud guruhlar</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Guruh</th>
+          <th>Kurs</th>
+          <th>O‘qituvchi</th>
+          <th>Jadval</th>
+          <th>O‘quvchilar soni</th>
+          {% if current_user.role == 'admin' %}<th>Amal</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in groups %}
+        <tr>
+          <td><strong>{{ g.name }}</strong></td>
+          <td>{{ g.course.name if g.course else '—' }}</td>
+          <td>{{ g.teacher.full_name if g.teacher else '—' }}</td>
+          <td>{{ g.schedule_info or '—' }}</td>
+          <td><span class="badge badge-blue">{{ g.students|length }}</span></td>
+          {% if current_user.role == 'admin' %}
+          <td>
+            <form method="POST" action="{{ url_for('group_delete', group_id=g.id) }}" onsubmit="return confirm('Guruh o‘chirilsinmi?');">
+              <button type="submit" class="btn btn-primary" style="padding:6px 10px;font-size:12px;">O‘chirish</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{% if current_user.role == 'admin' %}6{% else %}5{% endif %}" style="text-align:center;color:#6B7280;">Hozircha guruhlar yo‘q.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

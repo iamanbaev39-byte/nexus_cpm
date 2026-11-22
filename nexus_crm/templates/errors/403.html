@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ brand_name }} — 403</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body class="login-body">
+  <div class="login-card" style="text-align:center;">
+    <h1 style="font-size:48px;color:#4f46e5;margin-bottom:8px;">403</h1>
+    <h2 style="margin-bottom:10px;">Ruxsat yo‘q</h2>
+    <p style="color:#6B7280;margin-bottom:20px;">Bu amalni bajarish uchun administrator huquqi kerak.</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="justify-content:center;">Bosh sahifaga qaytish</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block page_title %}{{ 'O‘quvchini tahrirlash' if student else 'Yangi o‘quvchi' }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:760px;">
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Ism familiya</label>
+        <input type="text" name="full_name" class="form-control" value="{{ student.full_name if student else '' }}" required />
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input type="text" name="phone" class="form-control" value="{{ student.phone if student else '' }}" required />
+      </div>
+      <div class="form-group">
+        <label>Ota-ona telefoni</label>
+        <input type="text" name="parent_phone" class="form-control" value="{{ student.parent_phone if student else '' }}" />
+      </div>
+      <div class="form-group">
+        <label>Kurs</label>
+        <select name="course_id" class="form-control" required>
+          {% for course in courses %}
+          <option value="{{ course.id }}" {% if student and student.course_id == course.id %}selected{% endif %}>{{ course.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Guruh</label>
+        <select name="group_id" class="form-control">
+          <option value="">— Guruh tanlanmagan —</option>
+          {% for group in groups %}
+          <option value="{{ group.id }}" {% if student and student.group_id == group.id %}selected{% endif %}>{{ group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Oylik to‘lov</label>
+        <input type="number" step="1000" name="monthly_fee" class="form-control" value="{{ student.monthly_fee if student else '' }}" required />
+      </div>
+      <div class="form-group">
+        <label>To‘lov holati</label>
+        <select name="payment_status" class="form-control">
+          <option value="unpaid" {% if not student or student.payment_status == 'unpaid' %}selected{% endif %}>To‘lanmagan</option>
+          <option value="paid" {% if student and student.payment_status == 'paid' %}selected{% endif %}>To‘langan</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button type="submit" class="btn btn-primary">{{ 'Saqlash' if student else 'Qo‘shish' }}</button>
+      <a href="{{ url_for('students_list') }}" class="btn btn-dark">Bekor qilish</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
